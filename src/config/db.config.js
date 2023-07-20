@@ -11,10 +11,13 @@ const connect = () => {
       pass: USER_PASSWORD,
       dbName: DB_NAME,
     })
-    .then(() => console.log('Connected to the mongo database'))
+    .then((res) => {
+      // console.log(res);
+      console.log(`Connected to the ${DB_NAME} database`);
+    })
     .catch((error) => {
       console.log('Database Connection FAILED!');
-      console.log(error)
+      console.log(error);
       process.exit(1);
     });
 };
