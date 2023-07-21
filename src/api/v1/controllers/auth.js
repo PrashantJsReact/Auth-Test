@@ -1,32 +1,4 @@
-require('dotenv').config();
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const connectToMongoDB = require('./config/db.config');
-const User = require('./api/v1/models/user');
-const jwt = require('jsonwebtoken');
-const cookieParser = require('cookie-parser');
-const auth = require('./api/v1/middlewares/auth');
-
-const app = express();
-
-//* this will help us to read req.body if coming request is in urlencoded or json format
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// understand and interact with cookie
-app.use(cookieParser());
-
-// database connection
-(async () => await connectToMongoDB())();
-
-const { BCRYPT_SALT, JWT_SECRET } = process.env;
-
-app.get('/', (req, res, next) => {
-  console.log(req.body);
-  res.send('<h1>Hello Prashant I am fine and enjoying!</h1>');
-});
-
-app.post('/register', async (req, res, next) => {
+const signUpController = async (req, res, next) => {
   try {
     //* get all data from body
     const { firstName, lastName, email, password } = req.body;
@@ -67,9 +39,9 @@ app.post('/register', async (req, res, next) => {
   } catch (error) {
     console.log(error);
   }
-});
+};
 
-app.post('/login', async (req, res, next) => {
+const loginController = async (req, res, next) => {
   try {
     // get all data from frontend
     const { email, password } = req.body;
@@ -113,12 +85,15 @@ app.post('/login', async (req, res, next) => {
   } catch (error) {
     console.log(error);
   }
-});
+};
 
-app.get('/dashboard', auth, (req, res) => {
-  console.log(req.user);
-  return res.status(200).json({
-    msg: 'Welcome to dashboard!',
-  });
-});
-module.exports = app;
+const resetPasswordRequestController = async (req, res, next) => {};
+
+const resetPasswordController = async (req, res, next) => {};
+
+module.exports = {
+  signUpController,
+  loginController,
+  resetPasswordRequestController,
+  resetPasswordController,
+};
