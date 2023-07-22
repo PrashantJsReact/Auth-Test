@@ -22,11 +22,14 @@ const userSchema = new mongoose.Schema({
     trim: true,
     required: true,
   },
-  token: {
+  accessToken: {
+    type: String,
+    default: null,
+  },
+  refreshToken: {
     type: String,
     default: null,
   },
 });
 
-
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model('user', userSchema);

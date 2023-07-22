@@ -1,3 +1,12 @@
+const {
+  signUp,
+  login,
+  requestPasswordReset,
+  resetPassword,
+} = require('../services');
+
+const { User } = require('../models');
+
 const signUpController = async (req, res, next) => {
   try {
     //* get all data from body
@@ -9,35 +18,26 @@ const signUpController = async (req, res, next) => {
     }
 
     //* check if user already exists
-    const existingUer = await User.findOne({ email });
-    if (existingUer) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
       return res
         .status(401)
-        .json({ msg: 'User already exists with this email' });
+        .json({ error: 'User already exists with this email' });
     }
 
-    // encrypt the password
-    const encPassword = await bcrypt.hash(password, Number(BCRYPT_SALT));
+    const signUpServiceRes = await signUp(req.body);
+    if (signUpServiceRes.status === 500) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
 
-    // save the user in DB
-    const user = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: encPassword,
-    });
+    const { data } = signUpServiceRes;
+    req.session.accessToken = data.accessToken;
+    req.session.refreshToken = data.refreshToken;
 
-    // generate a toke for user and send it
-    const token = jwt.sign({ id: user._id, email }, JWT_SECRET, {
-      expiresIn: '15m',
-    });
-
-    user.token = token;
-    user.password = undefined; // for not sending to the client
-
-    return res.status(201).json(user);
+    return res.status(201).json(data);
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -49,41 +49,30 @@ const loginController = async (req, res, next) => {
       return res.status(400).json({ err: 'email and password is mandatory!' });
     }
 
-    // find user in DB
-    const user = await User.findOne({ email });
-    // match the password
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const token = jwt.sign(
-        {
-          id: user._id,
-          email,
-        },
-        JWT_SECRET,
-        {
-          expiresIn: '15m',
-        }
-      );
+    // check email and password and return token
+    const loginServiceRes = await login(req.body);
 
-      // send a token
-      user.token = token;
-      user.password = undefined;
-
-      // cookie section
-      const options = {
-        expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-      };
-
-      return res.status(200).cookie('token', token, options).json({
-        token,
-        success: true,
-        user,
-      });
+    switch (loginServiceRes.status) {
+      case 200:
+        const { data } = loginServiceRes;
+        req.session.accessToken = data.accessToken;
+        req.session.refreshToken = data.refreshToken;
+        return res.status(200).json(data);
+        break;
+      case 400:
+        return res.status(400).json({
+          error: 'email and password is not correct',
+        });
+        break;
+      default:
+        return res.status(500).json({
+          error: 'Internal server error',
+        });
+        break;
     }
-
-    return res.status(400).json({ err: 'email or password is not correct!' });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
