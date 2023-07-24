@@ -45,18 +45,21 @@ app.use(apiLimiter);
 
 //* creating session and storing into DB
 const { SESSION_SECRET, DB_NAME } = process.env;
+
+const store = MongoStore.create({
+  client: mongoose.connection.getClient(),
+  dbName: DB_NAME,
+  collectionName: 'sessions',
+  ttl: 15 * 60, // todo storing session for 15 min
+});
+
 app.use(
   session({
     secret: SESSION_SECRET,
     saveUninitialized: false, // don't create session until something stored
     resave: false, // don't save session if unmodified
     httpOnly: true, // client can not modify
-    store: MongoStore.create({
-      client: mongoose.connection.getClient(),
-      dbName: DB_NAME,
-      collectionName: 'sessions',
-      ttl: 15 * 60, // todo 15 min
-    }),
+    store: store,
   })
 );
 
