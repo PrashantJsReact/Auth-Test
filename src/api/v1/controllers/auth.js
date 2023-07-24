@@ -7,6 +7,9 @@ const {
 
 const { User } = require('../models');
 
+// @desc Create new User
+// @route POST /api/auth/signup
+// @access public
 const signUpController = async (req, res, next) => {
   try {
     //* get all data from body
@@ -41,6 +44,9 @@ const signUpController = async (req, res, next) => {
   }
 };
 
+// @desc Login with email and password
+// @route POST /api/auth/login
+// @access public
 const loginController = async (req, res, next) => {
   try {
     // get all data from frontend
@@ -76,8 +82,14 @@ const loginController = async (req, res, next) => {
   }
 };
 
+// @desc User will get link for forgetting password
+// @route POST /api/auth/requestResetPassword
+// @access public
 const resetPasswordRequestController = async (req, res, next) => {};
 
+// @desc User will Send new password with valid token and id
+// @route POST /api/auth/resetPassword
+// @access public
 const resetPasswordController = async (req, res, next) => {};
 
 module.exports = {
