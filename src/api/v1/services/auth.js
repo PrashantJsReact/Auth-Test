@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { User } = require('../models');
+const { randomBytes } = require('node:crypto');
 const { generateAccessToken, generateRefreshToken } = require('../utils');
 
 const { BCRYPT_SALT } = process.env;
@@ -72,7 +73,9 @@ const login = async (userData) => {
   }
 };
 
-const requestPasswordReset = async () => {};
+const requestPasswordReset = async () => {
+  const resetStr = randomBytes(256).toString('hex');
+};
 
 const resetPassword = async () => {};
 
