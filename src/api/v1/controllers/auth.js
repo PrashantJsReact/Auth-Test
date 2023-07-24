@@ -76,9 +76,67 @@ const loginController = async (req, res, next) => {
   }
 };
 
-const resetPasswordRequestController = async (req, res, next) => {};
+// todo
+const resetPasswordRequestController = async (req, res, next) => {
+  // get email from body
+  const { email } = req.body;
 
-const resetPasswordController = async (req, res, next) => {};
+  if (!email) {
+    return res
+      .status(401)
+      .json({ error: 'email is mandatory to reset password!' });
+  }
+
+  try {
+    const passResetServiceRes = await requestPasswordReset(email);
+
+    switch (passResetServiceRes.status) {
+      case 200:
+        return res.status(200).json(passResetServiceRes);
+        break;
+      case 404:
+        return res.status(404).json(passResetServiceRes);
+        break;
+      default:
+        return res.status(500).json({ error: 'Internal server error' });
+        break;
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// todo
+const resetPasswordController = async (req, res, next) => {
+  // get email from body
+  const { userId, token, password } = req.body;
+
+  if (!(userId && token && password)) {
+    return res.status(401).json({
+      error: 'userId, token, password is mandatory to reset password!',
+    });
+  }
+
+  try {
+    const passResetServiceRes = await resetPassword(req.body);
+
+    switch (passResetServiceRes.status) {
+      case 200:
+        return res.status(200).json(passResetServiceRes);
+        break;
+      case 404:
+        return res.status(404).json(passResetServiceRes);
+        break;
+      default:
+        return res.status(500).json({ error: 'Internal server error' });
+        break;
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 module.exports = {
   signUpController,
