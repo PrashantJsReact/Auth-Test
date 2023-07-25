@@ -12,7 +12,7 @@ const connectToMongoDB = async () => {
       dbName: DB_NAME,
     })
     .then((res) => {
-      console.log(`Connected to the ${DB_NAME}`);
+      console.log(`Connected to the ${res.connection.name}`);
     })
     .catch((error) => {
       console.log('Database Connection FAILED!');
