@@ -12,7 +12,8 @@ const signUp = async (userData) => {
     const { firstName, lastName, email, password } = userData;
 
     // encrypt the password
-    const encPassword = await bcrypt.hash(password, Number(BCRYPT_SALT));
+    const salt = await bcrypt.genSalt(Number(BCRYPT_SALT));
+    const encPassword = await bcrypt.hash(password, salt);
 
     // save the user in DB
     const user = await User.create({

@@ -11,7 +11,10 @@ const rateLimit = require('express-rate-limit');
 const connectToMongoDB = require('./config/db.config');
 const { authRoutes } = require('./api/v1/routes');
 
-const { isSessionActiveAndValid } = require('./api/v1/middlewares');
+const {
+  isSessionActiveAndValid,
+  errorHandler,
+} = require('./api/v1/middlewares');
 
 const app = express();
 
@@ -22,22 +25,22 @@ app.use(express.urlencoded({ extended: true }));
 //* understand and interact with cookie
 app.use(cookieParser());
 
-// setting HTTP response headers.
+//* setting HTTP response headers.
 app.use(helmet());
 
-// compress all responses
+//* compress all responses
 app.use(compression());
 
 const apiLimiter = rateLimit({
-  windowMs: 1000, // 1 minutes
-  max: 2, // Limit each IP to 2 requests per `window` (here, per 1 minutes)
+  windowMs: 1000, //* 1 minutes
+  max: 2, //* Limit each IP to 2 requests per `window` (here, per 1 minutes)
   message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  trustProxy: true, // Trust the X-Forwarded-For header (if you're behind a proxy/load balancer)
+  standardHeaders: true, //* Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, //* Disable the `X-RateLimit-*` headers
+  trustProxy: true, //* Trust the X-Forwarded-For header (if you're behind a proxy/load balancer)
 });
 
-// Apply the rate limiter to all requests
+//* Apply the rate limiter to all requests
 app.use(apiLimiter);
 
 //* database connection
@@ -77,12 +80,7 @@ app.get('/api/dashboard', isSessionActiveAndValid, (req, res) => {
   });
 });
 
-// Handle syntax error
-app.use((error, req, res, next) => {
-  console.log(error);
-  res
-    .status(500)
-    .json({ error: 'Invalid request!, Please check api documentation' });
-});
+// Handle All Global error
+app.use(errorHandler);
 
 module.exports = app;

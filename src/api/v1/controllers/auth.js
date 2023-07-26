@@ -1,3 +1,5 @@
+const asyncHandler = require('express-async-handler');
+
 const {
   signUp,
   login,
@@ -10,39 +12,38 @@ const { User } = require('../models');
 // @desc Create new User
 // @route POST /api/auth/signup
 // @access public
-const signUpController = async (req, res, next) => {
-  try {
-    //* get all data from body
-    const { firstName, lastName, email, password } = req.body;
+const signUpController = asyncHandler(async (req, res, next) => {
+  //* get all data from body
+  const { firstName, lastName, email, password } = req.body;
 
-    //* all the data should exists - email
-    if (!(firstName && lastName && email && password)) {
-      return res.status(400).json({ msg: 'All fields are mandatory!' });
-    }
+  //* all the data should exists - email
+  if (!(firstName && lastName && email && password)) {
+    res.status(400);
+    throw new Error('All fields are mandatory');
+    // return res.status(400).json({ msg: 'All fields are mandatory!' });
+  }
 
-    //* check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res
-        .status(401)
-        .json({ error: 'User already exists with this email' });
-    }
+  //* check if user already exists
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    res.status(401);
+    throw new Error('User already exists with this email');
+    // return res
+    //   .status(401)
+    //   .json({ error: 'User already exists with this email' });
+  }
 
-    const signUpServiceRes = await signUp(req.body);
-    if (signUpServiceRes.status === 500) {
-      res.status(500).json({ error: 'Internal server error' });
-    }
-
-    const { data } = signUpServiceRes;
-    req.session.accessToken = data.accessToken;
-    req.session.refreshToken = data.refreshToken;
-
-    return res.status(201).json(data);
-  } catch (error) {
-    console.log(error);
+  const signUpServiceRes = await signUp(req.body);
+  if (signUpServiceRes.status === 500) {
     res.status(500).json({ error: 'Internal server error' });
   }
-};
+
+  const { data } = signUpServiceRes;
+  req.session.accessToken = data.accessToken;
+  req.session.refreshToken = data.refreshToken;
+
+  return res.status(201).json(data);
+});
 
 // @desc Login with email and password
 // @route POST /api/auth/login
@@ -81,7 +82,6 @@ const loginController = async (req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 
 // @desc User will get link for forgetting password
 // @route POST /api/auth/requestResetPassword
