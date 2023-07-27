@@ -1,4 +1,4 @@
-const STATUS_CODE = require('../../../constants/statusCode');
+const STATUS_CODE = require('../../../config/statusCode');
 
 const errorHandler = (error, req, res, next) => {
   const statusCode = res.statusCode ? res.statusCode : 500;
