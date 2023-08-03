@@ -93,10 +93,12 @@ const requestPasswordReset = async (email) => {
     token = new Token({
       userId: user._id,
       token: hash,
-      createdAt: Date.now(),
+      createAt: Date.now(),
     });
 
     await token.save();
+
+    console.log('Reset password token', token);
 
     const resetPasswordLink = `${CLIENT_URL}/password-reset?token=${resetStr}&id=${user._id}`;
     console.log(resetPasswordLink);
