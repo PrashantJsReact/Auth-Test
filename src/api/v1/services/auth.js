@@ -23,7 +23,7 @@ const signUp = async (userData) => {
       password: encPassword,
     });
 
-    // generate a toke for user and send it
+    // generate a token for user and send it
     const userTokenInfo = {
       id: user._id,
       email,
@@ -129,7 +129,9 @@ const resetPassword = async (body) => {
       return { status: 404, error: "Invalid or token does'nt match" };
     }
 
-    const hash = await bcrypt.hash(password, Number(BCRYPT_SALT));
+    // encrypt the password
+    const salt = await bcrypt.genSalt(Number(BCRYPT_SALT));
+    const hash = await bcrypt.hash(password, salt);
 
     await User.updateOne(
       { _id: userId },
